@@ -2,40 +2,49 @@
 
 class GraphqlResource::Resource
   class << self
-    def generate(name)
+    def load_from_schema_type(name)
       type = load_type(name)
-      default_fragment = build_default_fragment(type)
-      queries = load_queries(type)
+      connections = []
+      default_fragment_fields = []
+      type.fields.each do |name, field|
+        if field.connection?
+          connections << name
+        else
+          default_fragment_fields << name
+        end
+      end
+      queries_returning_type, queries_returning_type_connection = load_queries(type)
       # mutations = load_mutations(name)
+      new(name: name, queries_returning_type: queries_returning_type, queries_returning_type_connection: queries_returning_type_connection, default_fragment_fields: default_fragment_fields, connections: connections)
     end
 
     def load_type(name)
-      ShopifyGqlApi::Client.schema.types[name]
-    end
-
-    def build_default_fragment(type)
-      <<~GRAPHQL.squish
-        fragment #{type.graphql_name}::Fragments::Default on #{type.name} {
-          #{type.fields.filter_map { |name, field| name if field.connection? }.join("\n")}
-        }
-      GRAPHQL
+      GraphqlResource::Client.schema.types[name]
     end
 
     def load_queries(type)
-      queries = ShopifyGqlApi::Client.schema.types['QueryRoot'].fields
-      finder_query = queries[type.graphql_name.downcase_first]
-      where_query = queries[type.graphql_name.downcase_first.pluralize]
-      # queries_returning_type = []
-      # queries_returning_type_connection = []
-      # other_queries_returning_type = queries.each do |name, query|
-      #   if query.type.respond_to?(:of_type)
-      #     queries_returning_type_connection << query if query.type.of_type.graphql_name == "#{type.graphql_name}Connection"
-      #   elsif query.type.graphql_name == type.graphql_name
-      #     queries_returning_type << query
-      #   end
-      # end
-
+      all_schema_queries = GraphqlResource::Client.schema.types['QueryRoot'].fields
+      queries_returning_type = []
+      queries_returning_type_connection = []
       binding.irb
+      all_schema_queries.each do |_name, query|
+        if query.type.to_type_signature == "#{type.graphql_name}Connection"
+          queries_returning_type_connection << query
+        elsif query.type.to_type_signature == type.graphql_name
+          queries_returning_type << query
+        end
+      end
+      [queries_returning_type, queries_returning_type_connection]
     end
+  end
+
+  attr_reader :name, :queries_returning_type, :queries_returning_type_connection, :default_fragment_fields, :connections
+
+  def initialize(name:, queries_returning_type:, queries_returning_type_connection:, default_fragment_fields:, connections:)
+    @name = name
+    @queries_returning_type = queries_returning_type
+    @queries_returning_type_connection = queries_returning_type_connection
+    @default_fragment_fields = default_fragment_fields
+    @connections = connections
   end
 end

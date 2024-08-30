@@ -3,7 +3,7 @@
 require 'graphql/client'
 require 'graphql/client/http'
 
-module GraphBase
+module GraphqlResource
   # Configure GraphQL endpoint using the basic HTTP network adapter.
   HTTP = GraphQL::Client::HTTP.new(ENV.fetch('SHOPIFY_GRAPHQL_ENDPOINT')) do
     def headers(context)
