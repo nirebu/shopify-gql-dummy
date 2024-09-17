@@ -9,12 +9,10 @@ module GraphqlResource
 
       template(
         "fragment.rb.erb",
-        "app/models/graphql_resource/#{name.underscore}/fragments/default.rb",
+        "app/models/#{name.underscore}/fragments/default.rb",
         default_fragment_fields: resource.default_fragment_fields
       )
       resource.queries_returning_type.each do |query|
-        binding.irb
-
         config = {
           wrapper_signature: wrapper_signature(query),
           internal_signature: internal_signature(query),
@@ -23,8 +21,13 @@ module GraphqlResource
         }
         template(
           "query_returning_type.rb.erb",
-          "app/models/graphql_resource/#{name.underscore}/queries/#{query.graphql_name.underscore}_query_template.rb",
+          "app/models/#{name.underscore}/queries/#{query.graphql_name.underscore}_query_template.rb",
           config,
+        )
+        template(
+          "attributes.rb.erb",
+          "app/models/#{name.underscore}/attributes.rb",
+          attributes: resource.default_fragment_fields.map { ":#{_1}" }
         )
       end
 
@@ -37,7 +40,7 @@ module GraphqlResource
         }
         template(
           "query_returning_type_connection.rb.erb",
-          "app/models/graphql_resource/#{name.underscore}/queries/#{query.graphql_name.underscore}_query_template.rb",
+          "app/models/#{name.underscore}/queries/#{query.graphql_name.underscore}_query_template.rb",
           config,
         )
       end

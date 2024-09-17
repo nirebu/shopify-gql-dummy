@@ -26,7 +26,6 @@ class GraphqlResource::Resource
       all_schema_queries = GraphqlResource::Client.schema.types['QueryRoot'].fields
       queries_returning_type = []
       queries_returning_type_connection = []
-      binding.irb
       all_schema_queries.each do |_name, query|
         if query.type.to_type_signature == "#{type.graphql_name}Connection"
           queries_returning_type_connection << query

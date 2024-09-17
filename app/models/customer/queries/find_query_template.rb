@@ -4,12 +4,11 @@
 # It may be overwritten by the generator when the resource is updated
 
 module GraphqlResource::Customer::Queries
-    FindTemplate = <<~GRAPHQL.squish
-      query(id: ID!) {
-        customer(id: $id) {
-          %<fragment>s
-        }
+  FindTemplate = <<~GRAPHQL.squish
+    query(id: ID!) {
+      customer(id: $id) {
+        %<fragment>s
       }
-    GRAPHQL
-  end
+    }
+  GRAPHQL
 end

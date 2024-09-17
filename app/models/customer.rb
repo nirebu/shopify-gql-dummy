@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 class Customer
-  include GraphqlResource
+  include GraphqlResource::FinderMethods
+  include Attributes
 
-  graphql_resource "Customer"
+  def greet
+    puts "hey, my name is #{firstName}"
+  end
 end
