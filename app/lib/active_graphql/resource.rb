@@ -6,9 +6,12 @@ class GraphqlResource::Resource
       type = load_type(name)
       connections = []
       default_fragment_fields = []
+      field_with_arguments = []
       type.fields.each do |name, field|
         if field.connection?
           connections << name
+        elsif field.any_arguments?
+          field_with_arguments << name
         else
           default_fragment_fields << name
         end

@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-module GraphqlResource; end
+module ActiveGraphql; end
